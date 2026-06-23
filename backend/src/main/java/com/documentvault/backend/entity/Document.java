@@ -10,11 +10,23 @@ public class Document{
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String fileName;
+
+    @Column(nullable = false, unique = true)
     private String storedFileName;
+
+    @Column(nullable = false)
     private String contentType;
+
+    @Column(nullable = false)
     private Long fileSize;
+
+    @Column(nullable = false)
     private String filePath;
+
+    @Column(nullable = false, updatable = false)
     private LocalDateTime uploadedAt;
 
     public Document(){}
