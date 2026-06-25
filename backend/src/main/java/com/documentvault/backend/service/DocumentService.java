@@ -1,8 +1,9 @@
 package com.documentvault.backend.service;
 
-import org.springframework.stereotype.Service;
+import com.documentvault.backend.dto.UploadResponse;
 
-@Service
-public class DocumentService{
-    
+import org.springframework.web.multipart.MultipartFile;
+
+public interface DocumentService {
+    UploadResponse uploadDocument(MultipartFile file);
 }
