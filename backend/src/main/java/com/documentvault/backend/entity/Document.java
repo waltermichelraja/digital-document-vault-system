@@ -10,11 +10,23 @@ public class Document{
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable=false)
     private String fileName;
+
+    @Column(nullable=false,unique=true)
     private String storedFileName;
+
+    @Column(nullable=false)
     private String contentType;
+
+    @Column(nullable=false)
     private Long fileSize;
+
+    @Column(nullable=false)
     private String filePath;
+
+    @Column(nullable=false,updatable=false)
     private LocalDateTime uploadedAt;
 
     public Document(){}
@@ -23,6 +35,10 @@ public class Document{
     public void prePersist(){
         uploadedAt=LocalDateTime.now();
     }
+    public LocalDateTime getUploadedAt(){
+        return uploadedAt;
+    }
+
     public Long getId(){
         return id;
     }
@@ -63,9 +79,5 @@ public class Document{
     }
     public void setFilePath(String filePath){
         this.filePath=filePath;
-    }
-
-    public LocalDateTime getUploadedAt(){
-        return uploadedAt;
     }
 }
