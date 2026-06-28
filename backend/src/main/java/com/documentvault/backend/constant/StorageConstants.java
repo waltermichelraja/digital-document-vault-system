@@ -1,5 +1,6 @@
-public final class StorageConstants{
+package com.documentvault.backend.constant;
 
+public final class StorageConstants{
     private StorageConstants(){}
 
     public static final String STORAGE_ROOT="storage";
