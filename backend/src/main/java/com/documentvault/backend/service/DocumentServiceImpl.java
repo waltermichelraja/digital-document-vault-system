@@ -1,8 +1,12 @@
 package com.documentvault.backend.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.UploadResponse;
 import com.documentvault.backend.entity.Document;
 import com.documentvault.backend.repository.DocumentRepository;
@@ -40,6 +44,26 @@ public class DocumentServiceImpl implements DocumentService{
                 true,
                 "file uploaded successfully.",
                 document.getId()
+        );
+    }
+
+    @Override
+    public List<DocumentResponse> getAllDocuments(){
+        return documentRepository.findAll()
+                .stream()
+                .map(this::mapToDocumentResponse)
+                .collect(Collectors.toList());
+    }
+
+    private DocumentResponse mapToDocumentResponse(Document document){
+        return new DocumentResponse(
+                document.getId(),
+                document.getDocumentTitle(),
+                document.getCategory(),
+                document.getOriginalFileName(),
+                document.getContentType(),
+                document.getFileSize(),
+                document.getUploadedAt()
         );
     }
 }
