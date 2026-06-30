@@ -1,12 +1,15 @@
 package com.documentvault.backend.service.storage;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +17,7 @@ import com.documentvault.backend.constant.StorageConstants;
 
 @Service
 public class StorageServiceImpl implements StorageService{
+
     @Override
     public String store(MultipartFile file){
         try{
@@ -29,18 +33,22 @@ public class StorageServiceImpl implements StorageService{
                     StandardCopyOption.REPLACE_EXISTING
             );
             return storedFileName;
-
         }catch(IOException e){
             throw new RuntimeException("unable to store file.",e);
         }
     }
 
     @Override
-    public byte[] read(String storedFileName){
+    public Resource load(String storedFileName){
         try{
-            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY).resolve(storedFileName);
-            return Files.readAllBytes(file);
-        }catch (IOException e){
+            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY)
+                    .resolve(storedFileName);
+            Resource resource=new UrlResource(file.toUri());
+            if(resource.exists() && resource.isReadable()){
+                return resource;
+            }
+            throw new RuntimeException("unable to read file.");
+        }catch(MalformedURLException e){
             throw new RuntimeException("unable to read file.",e);
         }
     }
@@ -48,10 +56,12 @@ public class StorageServiceImpl implements StorageService{
     @Override
     public void delete(String storedFileName){
         try{
-            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY).resolve(storedFileName);
+            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY)
+                    .resolve(storedFileName);
             Files.deleteIfExists(file);
-        }catch (IOException e){
+        }catch(IOException e){
             throw new RuntimeException("unable to delete file.",e);
         }
     }
+
 }

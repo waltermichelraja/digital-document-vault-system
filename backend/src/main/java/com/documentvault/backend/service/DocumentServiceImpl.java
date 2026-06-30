@@ -3,12 +3,14 @@ package com.documentvault.backend.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.UploadResponse;
 import com.documentvault.backend.entity.Document;
+import com.documentvault.backend.exception.DocumentNotFoundException;
 import com.documentvault.backend.repository.DocumentRepository;
 import com.documentvault.backend.service.storage.StorageService;
 
@@ -39,7 +41,6 @@ public class DocumentServiceImpl implements DocumentService{
         document.setFilePath("storage/documents/"+storedFileName);
 
         documentRepository.save(document);
-
         return new UploadResponse(
                 true,
                 "file uploaded successfully.",
@@ -53,6 +54,14 @@ public class DocumentServiceImpl implements DocumentService{
                 .stream()
                 .map(this::mapToDocumentResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Resource downloadDocument(Long documentId){
+        Document document=documentRepository.findById(documentId)
+                .orElseThrow(() ->
+                        new DocumentNotFoundException("document not found."));
+        return storageService.load(document.getStoredFileName());
     }
 
     private DocumentResponse mapToDocumentResponse(Document document){

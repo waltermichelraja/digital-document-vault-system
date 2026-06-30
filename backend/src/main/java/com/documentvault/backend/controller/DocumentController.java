@@ -2,12 +2,10 @@ package com.documentvault.backend.controller;
 
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documentvault.backend.dto.DocumentResponse;
@@ -34,8 +32,19 @@ public class DocumentController{
 
     @GetMapping
     public ResponseEntity<List<DocumentResponse>> getAllDocuments(){
-        List<DocumentResponse> documents=documentService.getAllDocuments();
-        return ResponseEntity.ok(documents);
+        return ResponseEntity.ok(
+                documentService.getAllDocuments()
+        );
     }
 
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id){
+        Resource resource=documentService.downloadDocument(id);
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\""+resource.getFilename()+"\""
+                )
+                .body(resource);
+    }
 }
