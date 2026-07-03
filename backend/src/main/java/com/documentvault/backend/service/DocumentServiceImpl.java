@@ -1,56 +1,78 @@
 package com.documentvault.backend.service;
 
-import com.documentvault.backend.dto.UploadResponse;
-import com.documentvault.backend.entity.Document;
-import com.documentvault.backend.repository.DocumentRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.UUID;
+import com.documentvault.backend.dto.DocumentResponse;
+import com.documentvault.backend.dto.UploadResponse;
+import com.documentvault.backend.entity.Document;
+import com.documentvault.backend.exception.DocumentNotFoundException;
+import com.documentvault.backend.repository.DocumentRepository;
+import com.documentvault.backend.service.storage.StorageService;
 
 @Service
 public class DocumentServiceImpl implements DocumentService{
     private final DocumentRepository documentRepository;
-    private static final String STORAGE_DIRECTORY="storage";
+    private final StorageService storageService;
 
-    public DocumentServiceImpl(DocumentRepository documentRepository){
+    public DocumentServiceImpl(DocumentRepository documentRepository,StorageService storageService){
         this.documentRepository=documentRepository;
+        this.storageService=storageService;
     }
 
     @Override
-    public UploadResponse uploadDocument(MultipartFile file){
-        try{
-            Path storagePath=Paths.get(STORAGE_DIRECTORY);
-            if(!Files.exists(storagePath)){
-                Files.createDirectories(storagePath);
-            }
-            String storedFileName=UUID.randomUUID()+"_"+file.getOriginalFilename();
-            Path filePath=storagePath.resolve(storedFileName);
-            Files.copy(
-                file.getInputStream(),
-                filePath,
-                StandardCopyOption.REPLACE_EXISTING
-            );
-            Document document=new Document();
-            document.setFileName(file.getOriginalFilename());
-            document.setStoredFileName(storedFileName);
-            document.setContentType(file.getContentType());
-            document.setFileSize(file.getSize());
-            document.setFilePath(filePath.toString());
-            documentRepository.save(document);
-            return new UploadResponse(
+    public UploadResponse uploadDocument(String documentTitle,String category,MultipartFile file){
+        String storedFileName=storageService.store(file);
+        Document document=new Document();
+
+        document.setDocumentTitle(documentTitle);
+        document.setCategory(category);
+
+        document.setOriginalFileName(file.getOriginalFilename());
+        document.setStoredFileName(storedFileName);
+
+        document.setContentType(file.getContentType());
+        document.setFileSize(file.getSize());
+
+        document.setFilePath("storage/documents/"+storedFileName);
+
+        documentRepository.save(document);
+        return new UploadResponse(
                 true,
-                "File uploaded successfully",
+                "file uploaded successfully.",
                 document.getId()
-            );
-        }catch(IOException e){
-            throw new RuntimeException("Failed to upload file.",e);
-        }
+        );
+    }
+
+    @Override
+    public List<DocumentResponse> getAllDocuments(){
+        return documentRepository.findAll()
+                .stream()
+                .map(this::mapToDocumentResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Resource downloadDocument(Long documentId){
+        Document document=documentRepository.findById(documentId)
+                .orElseThrow(() ->
+                        new DocumentNotFoundException("document not found."));
+        return storageService.load(document.getStoredFileName());
+    }
+
+    private DocumentResponse mapToDocumentResponse(Document document){
+        return new DocumentResponse(
+                document.getId(),
+                document.getDocumentTitle(),
+                document.getCategory(),
+                document.getOriginalFileName(),
+                document.getContentType(),
+                document.getFileSize(),
+                document.getUploadedAt()
+        );
     }
 }

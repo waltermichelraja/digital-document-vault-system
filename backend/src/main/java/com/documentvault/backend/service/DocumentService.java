@@ -1,9 +1,18 @@
 package com.documentvault.backend.service;
 
-import com.documentvault.backend.dto.UploadResponse;
+import java.util.List;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface DocumentService {
-    UploadResponse uploadDocument(MultipartFile file);
+import com.documentvault.backend.dto.DocumentResponse;
+import com.documentvault.backend.dto.UploadResponse;
+
+public interface DocumentService{
+    UploadResponse uploadDocument(String documentTitle,String category,MultipartFile file);
+
+    List<DocumentResponse> getAllDocuments();
+
+    Resource downloadDocument(Long documentId);
+
 }
