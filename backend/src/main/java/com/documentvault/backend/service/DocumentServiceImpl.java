@@ -75,4 +75,13 @@ public class DocumentServiceImpl implements DocumentService{
                 document.getUploadedAt()
         );
     }
+
+    @Override
+    public void deleteDocument(Long documentId){
+        Document document=documentRepository.findById(documentId)
+                .orElseThrow(() ->
+                        new DocumentNotFoundException("document not found."));
+        storageService.delete(document.getStoredFileName());
+        documentRepository.delete(document);
+    }
 }
