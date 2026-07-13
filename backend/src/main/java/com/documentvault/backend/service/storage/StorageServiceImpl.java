@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documentvault.backend.constant.StorageConstants;
+import com.documentvault.backend.exception.StorageException;
 
 @Service
 public class StorageServiceImpl implements StorageService{
@@ -34,7 +35,7 @@ public class StorageServiceImpl implements StorageService{
             );
             return storedFileName;
         }catch(IOException e){
-            throw new RuntimeException("unable to store file.",e);
+            throw new StorageException("unable to store file.",e);
         }
     }
 
@@ -47,9 +48,9 @@ public class StorageServiceImpl implements StorageService{
             if(resource.exists() && resource.isReadable()){
                 return resource;
             }
-            throw new RuntimeException("unable to read file.");
+            throw new StorageException("unable to read file.");
         }catch(MalformedURLException e){
-            throw new RuntimeException("unable to read file.",e);
+            throw new StorageException("unable to read file.",e);
         }
     }
 
@@ -60,7 +61,7 @@ public class StorageServiceImpl implements StorageService{
                     .resolve(storedFileName);
             Files.deleteIfExists(file);
         }catch(IOException e){
-            throw new RuntimeException("unable to delete file.",e);
+            throw new StorageException("unable to delete file.",e);
         }
     }
 

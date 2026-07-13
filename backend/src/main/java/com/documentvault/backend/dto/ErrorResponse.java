@@ -1,5 +1,7 @@
 package com.documentvault.backend.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,8 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UploadResponse{
-    private boolean success;
+public class ErrorResponse{
+    private LocalDateTime timestamp;
+    private int status;
     private String message;
-    private Long documentId;
 }
