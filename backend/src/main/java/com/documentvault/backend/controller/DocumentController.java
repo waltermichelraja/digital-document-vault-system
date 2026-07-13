@@ -28,10 +28,16 @@ public class DocumentController{
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<UploadResponse> uploadDocument(
-            @RequestParam("documentTitle") String documentTitle,
-            @RequestParam("category") String category,
-            @RequestParam("file") MultipartFile file){
+    public ResponseEntity<UploadResponse> uploadDocument(@RequestParam String documentTitle,@RequestParam String category,@RequestParam MultipartFile file){
+        if(documentTitle==null||documentTitle.isBlank()){
+            throw new IllegalArgumentException("document title cannot be empty.");
+        }
+        if(category==null||category.isBlank()){
+            throw new IllegalArgumentException("category cannot be empty.");
+        }
+        if(file==null||file.isEmpty()){
+            throw new IllegalArgumentException("file cannot be empty.");
+        }
         UploadResponse response=documentService.uploadDocument(documentTitle,category,file);
         return ResponseEntity.ok(response);
     }
