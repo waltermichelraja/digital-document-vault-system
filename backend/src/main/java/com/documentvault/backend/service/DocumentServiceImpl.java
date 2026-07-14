@@ -11,6 +11,7 @@ import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.UploadResponse;
 import com.documentvault.backend.entity.Document;
 import com.documentvault.backend.entity.User;
+import com.documentvault.backend.exception.AccessDeniedException;
 import com.documentvault.backend.exception.DocumentNotFoundException;
 import com.documentvault.backend.repository.DocumentRepository;
 import com.documentvault.backend.security.currentuser.CurrentUserService;
@@ -70,7 +71,7 @@ public class DocumentServiceImpl implements DocumentService{
                         new DocumentNotFoundException("document not found."));
         User currentUser=currentUserService.getCurrentUser();
         if(document.getOwner()==null || !document.getOwner().getId().equals(currentUser.getId())){
-            throw new IllegalArgumentException("access denied.");
+            throw new AccessDeniedException("access denied.");
         }
         return storageService.load(document.getStoredFileName());
     }
@@ -94,7 +95,7 @@ public class DocumentServiceImpl implements DocumentService{
                         new DocumentNotFoundException("document not found."));
         User currentUser=currentUserService.getCurrentUser();
        if(document.getOwner()==null || !document.getOwner().getId().equals(currentUser.getId())){
-            throw new IllegalArgumentException("access denied.");
+            throw new AccessDeniedException("access denied.");
         }
         storageService.delete(document.getStoredFileName());
         documentRepository.delete(document);
