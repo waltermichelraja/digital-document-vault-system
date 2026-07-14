@@ -35,10 +35,6 @@ public class UserPrincipal implements UserDetails{
         return user.getEmail();
     }
 
-    public User getUser(){
-        return user;
-    }
-
     @Override
     public boolean isAccountNonExpired(){
         return true;
@@ -57,5 +53,9 @@ public class UserPrincipal implements UserDetails{
     @Override
     public boolean isEnabled(){
         return true;
+    }
+
+    public User getUser(){
+        return user;
     }
 }
