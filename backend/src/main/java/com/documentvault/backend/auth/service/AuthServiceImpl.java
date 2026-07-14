@@ -1,5 +1,6 @@
 package com.documentvault.backend.auth.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.documentvault.backend.auth.dto.AuthResponse;
@@ -11,9 +12,11 @@ import com.documentvault.backend.repository.UserRepository;
 @Service
 public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserRepository userRepository){
+    public AuthServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder){
         this.userRepository=userRepository;
+        this.passwordEncoder=passwordEncoder;
     }
 
     @Override
@@ -40,8 +43,7 @@ public class AuthServiceImpl implements AuthService{
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
 
-        // bcrypt comes in next step
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         user.setRole(Role.EMPLOYEE);
 
