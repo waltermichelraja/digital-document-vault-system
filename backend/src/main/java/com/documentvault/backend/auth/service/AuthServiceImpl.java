@@ -25,22 +25,15 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public AuthResponse register(RegisterRequest request){
-        if(request.getFullName()==null||request.getFullName().isBlank()){
-            throw new IllegalArgumentException("full name cannot be empty.");
-        }
-        if(request.getEmail()==null||request.getEmail().isBlank()){
-            throw new IllegalArgumentException("email cannot be empty.");
-        }
-        if(request.getPassword()==null||request.getPassword().isBlank()){
-            throw new IllegalArgumentException("password cannot be empty.");
-        }
         if(userRepository.existsByEmail(request.getEmail())){
             throw new IllegalArgumentException("email already exists.");
         }
         User user=new User();
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
         user.setRole(Role.EMPLOYEE);
         userRepository.save(user);
         return new AuthResponse(
