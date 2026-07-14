@@ -51,4 +51,20 @@ public interface DocumentRepository extends JpaRepository<Document,Long>{
             String category,
             Pageable pageable
     );
+
+    Page<Document> findByDocumentTitleContainingIgnoreCase(
+            String documentTitle,
+            Pageable pageable
+    );
+
+    Page<Document> findByCategoryIgnoreCase(
+            String category,
+            Pageable pageable
+    );
+
+    Page<Document> findByDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(
+            String documentTitle,
+            String category,
+            Pageable pageable
+    );
 }
