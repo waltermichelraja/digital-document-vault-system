@@ -66,14 +66,15 @@ public class DocumentServiceImpl implements DocumentService{
 
     @Override
     public Resource downloadDocument(Long documentId){
-        Document document=documentRepository.findById(documentId)
-                .orElseThrow(() ->
-                        new DocumentNotFoundException("document not found."));
-        User currentUser=currentUserService.getCurrentUser();
-        if(document.getOwner()==null || !document.getOwner().getId().equals(currentUser.getId())){
-            throw new AccessDeniedException("access denied.");
-        }
+        Document document=validateOwnership(documentId);
         return storageService.load(document.getStoredFileName());
+    }
+
+    @Override
+    public void deleteDocument(Long documentId){
+        Document document=validateOwnership(documentId);
+        storageService.delete(document.getStoredFileName());
+        documentRepository.delete(document);
     }
 
     private DocumentResponse mapToDocumentResponse(Document document){
@@ -88,16 +89,14 @@ public class DocumentServiceImpl implements DocumentService{
         );
     }
 
-    @Override
-    public void deleteDocument(Long documentId){
+    private Document validateOwnership(Long documentId){
+        User currentUser=currentUserService.getCurrentUser();
         Document document=documentRepository.findById(documentId)
                 .orElseThrow(() ->
                         new DocumentNotFoundException("document not found."));
-        User currentUser=currentUserService.getCurrentUser();
-       if(document.getOwner()==null || !document.getOwner().getId().equals(currentUser.getId())){
+        if(document.getOwner()==null || !document.getOwner().getId().equals(currentUser.getId())){
             throw new AccessDeniedException("access denied.");
         }
-        storageService.delete(document.getStoredFileName());
-        documentRepository.delete(document);
+        return document;
     }
 }
