@@ -56,17 +56,32 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     @Override
-    public List<DocumentResponse> getAllDocuments(String search){
+    public List<DocumentResponse> getAllDocuments(String search,String category){
         User currentUser=currentUserService.getCurrentUser();
         List<Document> documents;
-        if(search==null || search.isBlank()){
-            documents=documentRepository.findByOwner(currentUser);
-        }else{
+        boolean hasSearch=search!=null && !search.isBlank();
+        boolean hasCategory=category!=null && !category.isBlank();
+        if(hasSearch && hasCategory){
+            documents=documentRepository
+                    .findByOwnerAndDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(
+                            currentUser,
+                            search,
+                            category
+                    );
+        }else if(hasSearch){
             documents=documentRepository
                     .findByOwnerAndDocumentTitleContainingIgnoreCase(
                             currentUser,
                             search
                     );
+        }else if(hasCategory){
+            documents=documentRepository
+                    .findByOwnerAndCategoryIgnoreCase(
+                            currentUser,
+                            category
+                    );
+        }else{
+            documents=documentRepository.findByOwner(currentUser);
         }
         return documents.stream()
                 .map(this::mapToDocumentResponse)

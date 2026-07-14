@@ -11,7 +11,7 @@ import com.documentvault.backend.dto.UploadResponse;
 public interface DocumentService{
     UploadResponse uploadDocument(String documentTitle,String category,MultipartFile file);
 
-    List<DocumentResponse> getAllDocuments(String search);
+    List<DocumentResponse> getAllDocuments(String search,String category);
 
     Resource downloadDocument(Long documentId);
 
