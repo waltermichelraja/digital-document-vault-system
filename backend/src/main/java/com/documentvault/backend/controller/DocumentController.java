@@ -43,9 +43,9 @@ public class DocumentController{
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentResponse>> getAllDocuments(){
+    public ResponseEntity<List<DocumentResponse>> getAllDocuments(@RequestParam(required=false) String search){
         return ResponseEntity.ok(
-                documentService.getAllDocuments()
+                documentService.getAllDocuments(search)
         );
     }
 

@@ -9,4 +9,6 @@ import com.documentvault.backend.entity.User;
 
 public interface DocumentRepository extends JpaRepository<Document,Long>{
     List<Document> findByOwner(User owner);
+
+    List<Document> findByOwnerAndDocumentTitleContainingIgnoreCase(User owner,String documentTitle);
 }
