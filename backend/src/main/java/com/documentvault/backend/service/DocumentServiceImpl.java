@@ -75,6 +75,12 @@ public class DocumentServiceImpl implements DocumentService{
         if(!ALLOWED_SORT_FIELDS.contains(sortField)){
             throw new IllegalArgumentException("invalid sort field.");
         }
+        if(sortParts.length>1){
+            if(!sortParts[1].equalsIgnoreCase("asc")
+                    && !sortParts[1].equalsIgnoreCase("desc")){
+                throw new IllegalArgumentException("invalid sort direction.");
+            }
+        }
         Sort.Direction direction=
                 sortParts.length>1 &&
                 sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
