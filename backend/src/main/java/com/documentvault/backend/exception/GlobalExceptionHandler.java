@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -71,6 +72,19 @@ public class GlobalExceptionHandler{
         );
         return ResponseEntity
                 .badRequest()
+                .body(response);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(
+            AuthorizationDeniedException ex){
+        ErrorResponse response=new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "access denied."
+        );
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(response);
     }
 
