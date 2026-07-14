@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,9 +60,18 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     @Override
-    public PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size){
+    public PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size,String sort){
         User currentUser=currentUserService.getCurrentUser();
-        Pageable pageable=PageRequest.of(page,size);
+        String[] sortParts=sort.split(",");
+        String sortField=sortParts[0];
+        Sort.Direction direction=
+                sortParts.length>1 &&
+                sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
+        Pageable pageable=PageRequest.of(
+                page,
+                size,
+                Sort.by(direction,sortField)
+        );
         Page<Document> documents;
         boolean hasSearch=search!=null && !search.isBlank();
         boolean hasCategory=category!=null && !category.isBlank();

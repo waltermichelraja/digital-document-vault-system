@@ -10,7 +10,7 @@ import com.documentvault.backend.dto.UploadResponse;
 public interface DocumentService{
     UploadResponse uploadDocument(String documentTitle,String category,MultipartFile file);
 
-    PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size);
+    PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size,String sort);
 
     Resource downloadDocument(Long documentId);
 

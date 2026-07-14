@@ -46,9 +46,10 @@ public class DocumentController{
             @RequestParam(required=false) String search,
             @RequestParam(required=false) String category,
             @RequestParam(defaultValue="0") int page,
-            @RequestParam(defaultValue="10") int size){
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue="uploadedAt,desc") String sort){
         return ResponseEntity.ok(
-                documentService.getAllDocuments(search,category,page,size)
+                documentService.getAllDocuments(search,category,page,size,sort)
         );
     }
 
