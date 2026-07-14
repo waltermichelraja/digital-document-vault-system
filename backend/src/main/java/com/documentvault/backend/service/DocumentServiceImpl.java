@@ -1,5 +1,6 @@
 package com.documentvault.backend.service;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
@@ -26,6 +27,13 @@ public class DocumentServiceImpl implements DocumentService{
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
     private final CurrentUserService currentUserService;
+
+    private static final Set<String> ALLOWED_SORT_FIELDS=Set.of(
+            "documentTitle",
+            "uploadedAt",
+            "category",
+            "fileSize"
+    );
 
     public DocumentServiceImpl(DocumentRepository documentRepository,StorageService storageService,CurrentUserService currentUserService){
         this.documentRepository=documentRepository;
@@ -64,6 +72,9 @@ public class DocumentServiceImpl implements DocumentService{
         User currentUser=currentUserService.getCurrentUser();
         String[] sortParts=sort.split(",");
         String sortField=sortParts[0];
+        if(!ALLOWED_SORT_FIELDS.contains(sortField)){
+            throw new IllegalArgumentException("invalid sort field.");
+        }
         Sort.Direction direction=
                 sortParts.length>1 &&
                 sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
