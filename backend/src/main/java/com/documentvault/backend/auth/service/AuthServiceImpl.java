@@ -1,5 +1,7 @@
 package com.documentvault.backend.auth.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private static final Logger logger= LoggerFactory.getLogger(AuthServiceImpl.class);
 
     public AuthServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder,JwtService jwtService){
         this.userRepository=userRepository;
@@ -36,6 +39,7 @@ public class AuthServiceImpl implements AuthService{
         );
         user.setRole(Role.EMPLOYEE);
         userRepository.save(user);
+        logger.info("user '{}' registered successfully.",user.getEmail());
         return new AuthResponse(
                 true,
                 "user registered successfully."
@@ -53,6 +57,7 @@ public class AuthServiceImpl implements AuthService{
             throw new IllegalArgumentException("invalid email or password.");
         }
         String token=jwtService.generateToken(user.getEmail());
+        logger.info("user '{}' logged in successfully.",user.getEmail());
         return new AuthResponse(
                 true,
                 "login successful.",

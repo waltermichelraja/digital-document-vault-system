@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import com.documentvault.backend.exception.StorageException;
 
 @Service
 public class StorageServiceImpl implements StorageService{
+    private static final Logger logger=LoggerFactory.getLogger(StorageServiceImpl.class);
 
     @Override
     public String store(MultipartFile file){
@@ -33,8 +36,10 @@ public class StorageServiceImpl implements StorageService{
                     destination,
                     StandardCopyOption.REPLACE_EXISTING
             );
+            logger.info("stored file '{}'.",storedFileName);
             return storedFileName;
         }catch(IOException e){
+            logger.error("failed to store file '{}'.",file.getOriginalFilename(),e);
             throw new StorageException("unable to store file.",e);
         }
     }
@@ -46,10 +51,12 @@ public class StorageServiceImpl implements StorageService{
                     .resolve(storedFileName);
             Resource resource=new UrlResource(file.toUri());
             if(resource.exists() && resource.isReadable()){
+                logger.info("loaded file '{}'.",storedFileName);
                 return resource;
             }
             throw new StorageException("unable to read file.");
         }catch(MalformedURLException e){
+            logger.error("failed to load file '{}'.",storedFileName,e);
             throw new StorageException("unable to read file.",e);
         }
     }
@@ -60,9 +67,10 @@ public class StorageServiceImpl implements StorageService{
             Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY)
                     .resolve(storedFileName);
             Files.deleteIfExists(file);
+            logger.info("deleted file '{}'.",storedFileName);
         }catch(IOException e){
+            logger.error("failed to delete file '{}'.", storedFileName, e);
             throw new StorageException("unable to delete file.",e);
         }
     }
-
 }

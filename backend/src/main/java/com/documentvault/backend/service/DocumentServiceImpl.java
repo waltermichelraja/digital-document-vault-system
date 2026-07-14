@@ -3,6 +3,8 @@ package com.documentvault.backend.service;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +29,7 @@ public class DocumentServiceImpl implements DocumentService{
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
     private final CurrentUserService currentUserService;
+    private static final Logger logger=LoggerFactory.getLogger(DocumentServiceImpl.class);
 
     private static final Set<String> ALLOWED_SORT_FIELDS=Set.of(
             "documentTitle",
@@ -60,6 +63,7 @@ public class DocumentServiceImpl implements DocumentService{
 
         document.setOwner(currentUser);
         documentRepository.save(document);
+        logger.info("user '{}' uploaded document '{}'.",currentUser.getEmail(),document.getDocumentTitle());
         return new UploadResponse(
                 true,
                 "file uploaded successfully.",
@@ -133,13 +137,17 @@ public class DocumentServiceImpl implements DocumentService{
     @Override
     public Resource downloadDocument(Long documentId){
         Document document=validateOwnership(documentId);
+        User currentUser=currentUserService.getCurrentUser();
+        logger.info("user '{}' downloaded document '{}'.",currentUser.getEmail(),document.getDocumentTitle());
         return storageService.load(document.getStoredFileName());
     }
 
     @Override
     public void deleteDocument(Long documentId){
         Document document=validateOwnership(documentId);
+        User currentUser=currentUserService.getCurrentUser();
         storageService.delete(document.getStoredFileName());
+        logger.info("user '{}' deleted document '{}'.",currentUser.getEmail(),document.getDocumentTitle());
         documentRepository.delete(document);
     }
 
