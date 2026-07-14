@@ -9,15 +9,18 @@ import com.documentvault.backend.auth.dto.RegisterRequest;
 import com.documentvault.backend.entity.Role;
 import com.documentvault.backend.entity.User;
 import com.documentvault.backend.repository.UserRepository;
+import com.documentvault.backend.security.jwt.JwtService;
 
 @Service
 public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder){
+    public AuthServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder,JwtService jwtService){
         this.userRepository=userRepository;
         this.passwordEncoder=passwordEncoder;
+        this.jwtService=jwtService;
     }
 
     @Override
@@ -56,9 +59,11 @@ public class AuthServiceImpl implements AuthService{
                 user.getPassword())){
             throw new IllegalArgumentException("invalid email or password.");
         }
+        String token=jwtService.generateToken(user.getEmail());
         return new AuthResponse(
                 true,
-                "login successful."
+                "login successful.",
+                token
         );
     }
 }
