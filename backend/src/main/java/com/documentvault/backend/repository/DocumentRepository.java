@@ -1,9 +1,12 @@
 package com.documentvault.backend.repository;
 
-import com.documentvault.backend.entity.Document;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface DocumentRepository extends JpaRepository<Document, Long>{
-    
+import com.documentvault.backend.entity.Document;
+import com.documentvault.backend.entity.User;
+
+public interface DocumentRepository extends JpaRepository<Document,Long>{
+    List<Document> findByOwner(User owner);
 }
