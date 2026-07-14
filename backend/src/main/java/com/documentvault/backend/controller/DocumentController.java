@@ -1,7 +1,5 @@
 package com.documentvault.backend.controller;
 
-import java.util.List;
-
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documentvault.backend.dto.DocumentResponse;
+import com.documentvault.backend.dto.PageResponse;
 import com.documentvault.backend.dto.UploadResponse;
 import com.documentvault.backend.service.DocumentService;
 
@@ -43,11 +42,13 @@ public class DocumentController{
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentResponse>> getAllDocuments(
+    public ResponseEntity<PageResponse<DocumentResponse>> getAllDocuments(
             @RequestParam(required=false) String search,
-            @RequestParam(required=false) String category){
+            @RequestParam(required=false) String category,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size){
         return ResponseEntity.ok(
-                documentService.getAllDocuments(search,category)
+                documentService.getAllDocuments(search,category,page,size)
         );
     }
 

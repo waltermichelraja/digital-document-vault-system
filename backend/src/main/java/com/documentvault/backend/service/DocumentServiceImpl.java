@@ -1,13 +1,16 @@
 package com.documentvault.backend.service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documentvault.backend.dto.DocumentResponse;
+import com.documentvault.backend.dto.PageResponse;
 import com.documentvault.backend.dto.UploadResponse;
 import com.documentvault.backend.entity.Document;
 import com.documentvault.backend.entity.User;
@@ -56,9 +59,10 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     @Override
-    public List<DocumentResponse> getAllDocuments(String search,String category){
+    public PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size){
         User currentUser=currentUserService.getCurrentUser();
-        List<Document> documents;
+        Pageable pageable=PageRequest.of(page,size);
+        Page<Document> documents;
         boolean hasSearch=search!=null && !search.isBlank();
         boolean hasCategory=category!=null && !category.isBlank();
         if(hasSearch && hasCategory){
@@ -66,26 +70,37 @@ public class DocumentServiceImpl implements DocumentService{
                     .findByOwnerAndDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(
                             currentUser,
                             search,
-                            category
+                            category,
+                            pageable
                     );
         }else if(hasSearch){
             documents=documentRepository
                     .findByOwnerAndDocumentTitleContainingIgnoreCase(
                             currentUser,
-                            search
+                            search,
+                            pageable
                     );
         }else if(hasCategory){
             documents=documentRepository
                     .findByOwnerAndCategoryIgnoreCase(
                             currentUser,
-                            category
+                            category,
+                            pageable
                     );
         }else{
-            documents=documentRepository.findByOwner(currentUser);
+            documents=documentRepository.findByOwner(
+                    currentUser,
+                    pageable
+            );
         }
-        return documents.stream()
-                .map(this::mapToDocumentResponse)
-                .collect(Collectors.toList());
+        return new PageResponse<>(
+                documents.getContent().stream().map(this::mapToDocumentResponse).collect(Collectors.toList()),
+                documents.getNumber(),
+                documents.getSize(),
+                documents.getTotalElements(),
+                documents.getTotalPages(),
+                documents.isLast()
+        );
     }
 
     @Override
