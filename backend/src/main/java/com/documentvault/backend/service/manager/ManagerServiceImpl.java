@@ -4,7 +4,10 @@ import java.util.stream.Collectors;
 
 import com.documentvault.backend.constant.SortConstants;
 import com.documentvault.backend.mapper.DocumentMapper;
+import com.documentvault.backend.security.currentuser.CurrentUserService;
 import com.documentvault.backend.util.PageableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.PageResponse;
 import com.documentvault.backend.entity.Document;
+import com.documentvault.backend.entity.User;
 import com.documentvault.backend.exception.DocumentNotFoundException;
 import com.documentvault.backend.repository.DocumentRepository;
 import com.documentvault.backend.service.storage.StorageService;
@@ -21,10 +25,13 @@ import com.documentvault.backend.service.storage.StorageService;
 public class ManagerServiceImpl implements ManagerService{
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
+    private final CurrentUserService currentUserService;
+    private static final Logger logger=LoggerFactory.getLogger(ManagerServiceImpl.class);
 
-    public ManagerServiceImpl(DocumentRepository documentRepository,StorageService storageService){
+    public ManagerServiceImpl(DocumentRepository documentRepository,StorageService storageService,CurrentUserService currentUserService){
         this.documentRepository=documentRepository;
         this.storageService=storageService;
+        this.currentUserService=currentUserService;
     }
 
     @Override
@@ -60,8 +67,8 @@ public class ManagerServiceImpl implements ManagerService{
         Document document=documentRepository.findById(documentId)
                 .orElseThrow(() ->
                         new DocumentNotFoundException("document not found."));
-        return storageService.load(
-                document.getStoredFileName()
-        );
+        User currentManager=currentUserService.getCurrentUser();
+        logger.info("manager '{}' downloaded document '{}'.",currentManager.getEmail(),document.getDocumentTitle());
+        return storageService.load(document.getStoredFileName());
     }
 }

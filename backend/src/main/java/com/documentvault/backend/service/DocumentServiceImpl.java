@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import com.documentvault.backend.constant.SortConstants;
 import com.documentvault.backend.mapper.DocumentMapper;
+import com.documentvault.backend.security.currentuser.CurrentUserService;
 import com.documentvault.backend.util.PageableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import com.documentvault.backend.entity.User;
 import com.documentvault.backend.exception.AccessDeniedException;
 import com.documentvault.backend.exception.DocumentNotFoundException;
 import com.documentvault.backend.repository.DocumentRepository;
-import com.documentvault.backend.security.currentuser.CurrentUserService;
 import com.documentvault.backend.service.storage.StorageService;
 
 @Service

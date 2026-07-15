@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import com.documentvault.backend.constant.SortConstants;
 import com.documentvault.backend.mapper.DocumentMapper;
+import com.documentvault.backend.security.currentuser.CurrentUserService;
 import com.documentvault.backend.util.PageableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.PageResponse;
 import com.documentvault.backend.entity.Document;
+import com.documentvault.backend.entity.User;
 import com.documentvault.backend.exception.DocumentNotFoundException;
 import com.documentvault.backend.repository.DocumentRepository;
 import com.documentvault.backend.service.storage.StorageService;
@@ -23,11 +25,13 @@ import com.documentvault.backend.service.storage.StorageService;
 public class AdminDocumentServiceImpl implements AdminDocumentService{
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
+    private final CurrentUserService currentUserService;
     private static final Logger logger=LoggerFactory.getLogger(AdminDocumentServiceImpl.class);
 
-    public AdminDocumentServiceImpl(DocumentRepository documentRepository,StorageService storageService){
+    public AdminDocumentServiceImpl(DocumentRepository documentRepository,StorageService storageService,CurrentUserService currentUserService){
         this.documentRepository=documentRepository;
         this.storageService=storageService;
+        this.currentUserService=currentUserService;
     }
 
     @Override
@@ -63,7 +67,8 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
         Document document=documentRepository.findById(documentId)
                 .orElseThrow(() ->
                         new DocumentNotFoundException("document not found."));
-        logger.info("admin downloaded document '{}'.",document.getDocumentTitle());
+        User currentAdmin=currentUserService.getCurrentUser();
+        logger.info("admin '{}' downloaded document '{}'.",currentAdmin.getEmail(),document.getDocumentTitle());
         return storageService.load(document.getStoredFileName());
     }
 
@@ -73,7 +78,8 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
                 .orElseThrow(() ->
                         new DocumentNotFoundException("document not found."));
         storageService.delete(document.getStoredFileName());
-        logger.info("admin deleted document '{}'.", document.getDocumentTitle());
+        User currentAdmin=currentUserService.getCurrentUser();
+        logger.info("admin '{}' deleted document '{}'.",currentAdmin.getEmail(),document.getDocumentTitle());
         documentRepository.delete(document);
     }
 }
