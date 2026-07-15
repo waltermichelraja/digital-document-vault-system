@@ -3,9 +3,11 @@ package com.documentvault.backend.service.admin;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.documentvault.backend.dto.DashboardResponse;
 import com.documentvault.backend.dto.UpdateRoleRequest;
 import com.documentvault.backend.entity.Role;
 import com.documentvault.backend.entity.User;
+import com.documentvault.backend.repository.DocumentRepository;
 import com.documentvault.backend.security.currentuser.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +20,13 @@ import com.documentvault.backend.repository.UserRepository;
 public class AdminServiceImpl implements AdminService{
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
+    private final DocumentRepository documentRepository;
     private static final Logger logger=LoggerFactory.getLogger(AdminServiceImpl.class);
 
-    public AdminServiceImpl(UserRepository userRepository, CurrentUserService currentUserService){
+    public AdminServiceImpl(UserRepository userRepository,CurrentUserService currentUserService,DocumentRepository documentRepository){
         this.userRepository=userRepository;
         this.currentUserService=currentUserService;
+        this.documentRepository=documentRepository;
     }
 
     @Override
@@ -63,6 +67,17 @@ public class AdminServiceImpl implements AdminService{
                 user.getFullName(),
                 user.getEmail(),
                 user.getRole()
+        );
+    }
+
+    @Override
+    public DashboardResponse getDashboard(){
+        return new DashboardResponse(
+                userRepository.count(),
+                userRepository.countByRole(Role.ADMIN),
+                userRepository.countByRole(Role.MANAGER),
+                userRepository.countByRole(Role.EMPLOYEE),
+                documentRepository.count()
         );
     }
 }

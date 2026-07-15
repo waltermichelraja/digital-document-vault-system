@@ -2,6 +2,7 @@ package com.documentvault.backend.controller;
 
 import java.util.List;
 
+import com.documentvault.backend.dto.*;
 import jakarta.validation.Valid;
 
 import org.springframework.core.io.Resource;
@@ -10,10 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.documentvault.backend.dto.DocumentResponse;
-import com.documentvault.backend.dto.PageResponse;
-import com.documentvault.backend.dto.UpdateRoleRequest;
-import com.documentvault.backend.dto.UserResponse;
 import com.documentvault.backend.service.admin.AdminDocumentService;
 import com.documentvault.backend.service.admin.AdminService;
 
@@ -72,5 +69,13 @@ public class AdminController{
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id){
         adminDocumentService.deleteDocument(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DashboardResponse> getDashboard(){
+        return ResponseEntity.ok(
+                adminService.getDashboard()
+        );
     }
 }
