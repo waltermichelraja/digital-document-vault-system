@@ -3,13 +3,13 @@ package com.documentvault.backend.service;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.documentvault.backend.constant.SortConstants;
+import com.documentvault.backend.util.PageableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,13 +31,6 @@ public class DocumentServiceImpl implements DocumentService{
     private final CurrentUserService currentUserService;
     private static final Logger logger=LoggerFactory.getLogger(DocumentServiceImpl.class);
 
-    private static final Set<String> ALLOWED_SORT_FIELDS=Set.of(
-            "documentTitle",
-            "uploadedAt",
-            "category",
-            "fileSize"
-    );
-
     public DocumentServiceImpl(DocumentRepository documentRepository,StorageService storageService,CurrentUserService currentUserService){
         this.documentRepository=documentRepository;
         this.storageService=storageService;
@@ -49,18 +42,13 @@ public class DocumentServiceImpl implements DocumentService{
         String storedFileName=storageService.store(file);
         Document document=new Document();
         User currentUser=currentUserService.getCurrentUser();
-
         document.setDocumentTitle(documentTitle);
         document.setCategory(category);
-
         document.setOriginalFileName(file.getOriginalFilename());
         document.setStoredFileName(storedFileName);
-
         document.setContentType(file.getContentType());
         document.setFileSize(file.getSize());
-
         document.setFilePath("storage/documents/"+storedFileName);
-
         document.setOwner(currentUser);
         documentRepository.save(document);
         logger.info("user '{}' uploaded document '{}'.",currentUser.getEmail(),document.getDocumentTitle());
@@ -74,55 +62,21 @@ public class DocumentServiceImpl implements DocumentService{
     @Override
     public PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size,String sort){
         User currentUser=currentUserService.getCurrentUser();
-        String[] sortParts=sort.split(",");
-        String sortField=sortParts[0];
-        if(!ALLOWED_SORT_FIELDS.contains(sortField)){
-            throw new IllegalArgumentException("invalid sort field.");
-        }
-        if(sortParts.length>1){
-            if(!sortParts[1].equalsIgnoreCase("asc")
-                    && !sortParts[1].equalsIgnoreCase("desc")){
-                throw new IllegalArgumentException("invalid sort direction.");
-            }
-        }
-        Sort.Direction direction=
-                sortParts.length>1 &&
-                sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
-        Pageable pageable=PageRequest.of(
-                page,
-                size,
-                Sort.by(direction,sortField)
-        );
+        Pageable pageable= PageableUtil.createPageable(page,size,sort,SortConstants.DOCUMENT_SORT_FIELDS);
         Page<Document> documents;
         boolean hasSearch=search!=null && !search.isBlank();
         boolean hasCategory=category!=null && !category.isBlank();
         if(hasSearch && hasCategory){
             documents=documentRepository
-                    .findByOwnerAndDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(
-                            currentUser,
-                            search,
-                            category,
-                            pageable
-                    );
+                    .findByOwnerAndDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(currentUser,search,category,pageable);
         }else if(hasSearch){
             documents=documentRepository
-                    .findByOwnerAndDocumentTitleContainingIgnoreCase(
-                            currentUser,
-                            search,
-                            pageable
-                    );
+                    .findByOwnerAndDocumentTitleContainingIgnoreCase(currentUser,search,pageable);
         }else if(hasCategory){
             documents=documentRepository
-                    .findByOwnerAndCategoryIgnoreCase(
-                            currentUser,
-                            category,
-                            pageable
-                    );
+                    .findByOwnerAndCategoryIgnoreCase(currentUser,category,pageable);
         }else{
-            documents=documentRepository.findByOwner(
-                    currentUser,
-                    pageable
-            );
+            documents=documentRepository.findByOwner(currentUser,pageable);
         }
         return new PageResponse<>(
                 documents.getContent().stream().map(this::mapToDocumentResponse).collect(Collectors.toList()),

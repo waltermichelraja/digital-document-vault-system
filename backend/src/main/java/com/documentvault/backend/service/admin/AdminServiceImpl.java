@@ -33,12 +33,7 @@ public class AdminServiceImpl implements AdminService{
     public List<UserResponse> getAllUsers(){
         return userRepository.findAll()
                 .stream()
-                .map(user -> new UserResponse(
-                        user.getId(),
-                        user.getFullName(),
-                        user.getEmail(),
-                        user.getRole()
-                ))
+                .map(user -> new UserResponse(user.getId(),user.getFullName(),user.getEmail(),user.getRole()))
                 .collect(Collectors.toList());
     }
 
@@ -48,7 +43,6 @@ public class AdminServiceImpl implements AdminService{
         User user=userRepository.findById(userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("user not found."));
-
         if(user.getId().equals(currentAdmin.getId())){
             throw new IllegalArgumentException("you cannot change your own role.");
         }
@@ -57,17 +51,9 @@ public class AdminServiceImpl implements AdminService{
         userRepository.save(user);
         logger.info(
                 "admin '{}' changed role of '{}' from '{}' to '{}'.",
-                currentAdmin.getEmail(),
-                user.getEmail(),
-                oldRole,
-                user.getRole()
+                currentAdmin.getEmail(),user.getEmail(),oldRole,user.getRole()
         );
-        return new UserResponse(
-                user.getId(),
-                user.getFullName(),
-                user.getEmail(),
-                user.getRole()
-        );
+        return new UserResponse(user.getId(),user.getFullName(),user.getEmail(),user.getRole());
     }
 
     @Override

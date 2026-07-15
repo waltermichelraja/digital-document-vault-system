@@ -3,13 +3,13 @@ package com.documentvault.backend.service.admin;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.documentvault.backend.constant.SortConstants;
+import com.documentvault.backend.util.PageableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.documentvault.backend.dto.DocumentResponse;
@@ -23,15 +23,7 @@ import com.documentvault.backend.service.storage.StorageService;
 public class AdminDocumentServiceImpl implements AdminDocumentService{
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
-
     private static final Logger logger=LoggerFactory.getLogger(AdminDocumentServiceImpl.class);
-
-    private static final Set<String> ALLOWED_SORT_FIELDS=Set.of(
-            "documentTitle",
-            "uploadedAt",
-            "category",
-            "fileSize"
-    );
 
     public AdminDocumentServiceImpl(DocumentRepository documentRepository,StorageService storageService){
         this.documentRepository=documentRepository;
@@ -40,47 +32,19 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
 
     @Override
     public PageResponse<DocumentResponse> getAllDocuments(String search,String category,int page,int size,String sort){
-        String[] sortParts=sort.split(",");
-        String sortField=sortParts[0];
-        if(!ALLOWED_SORT_FIELDS.contains(sortField)){
-            throw new IllegalArgumentException("invalid sort field.");
-        }
-        if(sortParts.length>1){
-            if(!sortParts[1].equalsIgnoreCase("asc")
-                    && !sortParts[1].equalsIgnoreCase("desc")){
-                throw new IllegalArgumentException("invalid sort direction.");
-            }
-        }
-        Sort.Direction direction=
-                sortParts.length>1 &&
-                        sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
-        Pageable pageable=PageRequest.of(
-                page,
-                size,
-                Sort.by(direction,sortField)
-        );
+        Pageable pageable= PageableUtil.createPageable(page,size,sort,SortConstants.DOCUMENT_SORT_FIELDS);
         Page<Document> documents;
         boolean hasSearch=search!=null && !search.isBlank();
         boolean hasCategory=category!=null && !category.isBlank();
         if(hasSearch && hasCategory){
             documents=documentRepository
-                    .findByDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(
-                            search,
-                            category,
-                            pageable
-                    );
+                    .findByDocumentTitleContainingIgnoreCaseAndCategoryIgnoreCase(search,category,pageable);
         }else if(hasSearch){
             documents=documentRepository
-                    .findByDocumentTitleContainingIgnoreCase(
-                            search,
-                            pageable
-                    );
+                    .findByDocumentTitleContainingIgnoreCase(search,pageable);
         }else if(hasCategory){
             documents=documentRepository
-                    .findByCategoryIgnoreCase(
-                            category,
-                            pageable
-                    );
+                    .findByCategoryIgnoreCase(category,pageable);
         }else{
             documents=documentRepository.findAll(pageable);
         }
