@@ -1,9 +1,9 @@
 package com.documentvault.backend.service.manager;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.documentvault.backend.constant.SortConstants;
+import com.documentvault.backend.mapper.DocumentMapper;
 import com.documentvault.backend.util.PageableUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -46,10 +46,7 @@ public class ManagerServiceImpl implements ManagerService{
             documents=documentRepository.findAll(pageable);
         }
         return new PageResponse<>(
-                documents.getContent()
-                        .stream()
-                        .map(this::mapToDocumentResponse)
-                        .collect(Collectors.toList()),
+                documents.getContent().stream().map(DocumentMapper::toResponse).collect(Collectors.toList()),
                 documents.getNumber(),
                 documents.getSize(),
                 documents.getTotalElements(),
@@ -65,18 +62,6 @@ public class ManagerServiceImpl implements ManagerService{
                         new DocumentNotFoundException("document not found."));
         return storageService.load(
                 document.getStoredFileName()
-        );
-    }
-
-    private DocumentResponse mapToDocumentResponse(Document document){
-        return new DocumentResponse(
-                document.getId(),
-                document.getDocumentTitle(),
-                document.getCategory(),
-                document.getOriginalFileName(),
-                document.getContentType(),
-                document.getFileSize(),
-                document.getUploadedAt()
         );
     }
 }

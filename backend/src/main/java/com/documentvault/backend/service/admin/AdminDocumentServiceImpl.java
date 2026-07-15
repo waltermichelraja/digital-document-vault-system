@@ -1,9 +1,9 @@
 package com.documentvault.backend.service.admin;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.documentvault.backend.constant.SortConstants;
+import com.documentvault.backend.mapper.DocumentMapper;
 import com.documentvault.backend.util.PageableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +49,7 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
             documents=documentRepository.findAll(pageable);
         }
         return new PageResponse<>(
-                documents.getContent()
-                        .stream()
-                        .map(this::mapToDocumentResponse)
-                        .collect(Collectors.toList()),
+                documents.getContent().stream().map(DocumentMapper::toResponse).collect(Collectors.toList()),
                 documents.getNumber(),
                 documents.getSize(),
                 documents.getTotalElements(),
@@ -78,17 +75,5 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
         storageService.delete(document.getStoredFileName());
         logger.info("admin deleted document '{}'.", document.getDocumentTitle());
         documentRepository.delete(document);
-    }
-
-    private DocumentResponse mapToDocumentResponse(Document document){
-        return new DocumentResponse(
-                document.getId(),
-                document.getDocumentTitle(),
-                document.getCategory(),
-                document.getOriginalFileName(),
-                document.getContentType(),
-                document.getFileSize(),
-                document.getUploadedAt()
-        );
     }
 }
