@@ -34,9 +34,7 @@ public class AdminController{
     @PatchMapping("/users/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateRole(@PathVariable String id,@Valid @RequestBody UpdateRoleRequest request){
-        return ResponseEntity.ok(
-                adminService.updateUserRole(id,request)
-        );
+        return ResponseEntity.ok(adminService.updateUserRole(id,request));
     }
 
     @GetMapping("/documents")
@@ -47,9 +45,7 @@ public class AdminController{
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue="uploadedAt,desc") String sort){
-        return ResponseEntity.ok(
-                adminDocumentService.getAllDocuments(search,category,page,size, sort)
-        );
+        return ResponseEntity.ok(adminDocumentService.getAllDocuments(search,category,page,size, sort));
     }
 
     @GetMapping("/documents/download/{id}")
@@ -57,11 +53,9 @@ public class AdminController{
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id){
         Resource resource=adminDocumentService.downloadDocument(id);
         return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
+                .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\""+resource.getFilename()+"\""
-                )
-                .body(resource);
+                ).body(resource);
     }
 
     @DeleteMapping("/documents/{id}")
@@ -74,8 +68,6 @@ public class AdminController{
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DashboardResponse> getDashboard(){
-        return ResponseEntity.ok(
-                adminService.getDashboard()
-        );
+        return ResponseEntity.ok(adminService.getDashboard());
     }
 }

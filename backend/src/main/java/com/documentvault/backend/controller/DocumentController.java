@@ -7,7 +7,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.PageResponse;
@@ -28,11 +27,7 @@ public class DocumentController{
         if(request.getFile().isEmpty()){
             throw new IllegalArgumentException("file cannot be empty.");
         }
-        UploadResponse response=documentService.uploadDocument(
-                request.getDocumentTitle(),
-                request.getCategory(),
-                request.getFile()
-        );
+        UploadResponse response=documentService.uploadDocument(request.getDocumentTitle(),request.getCategory(),request.getFile());
         return ResponseEntity.ok(response);
     }
 
@@ -43,20 +38,16 @@ public class DocumentController{
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue="uploadedAt,desc") String sort){
-        return ResponseEntity.ok(
-                documentService.getAllDocuments(search,category,page,size,sort)
-        );
+        return ResponseEntity.ok(documentService.getAllDocuments(search,category,page,size,sort));
     }
 
     @GetMapping("/download/{id}")
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id){
         Resource resource=documentService.downloadDocument(id);
         return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
+                .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\""+resource.getFilename()+"\""
-                )
-                .body(resource);
+                ).body(resource);
     }
 
     @DeleteMapping("/{id}")

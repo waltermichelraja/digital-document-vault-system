@@ -27,19 +27,15 @@ public class ManagerController{
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue="uploadedAt,desc") String sort){
-        return ResponseEntity.ok(
-                managerService.getAllDocuments(search,category,page,size,sort)
-        );
+        return ResponseEntity.ok(managerService.getAllDocuments(search,category,page,size,sort));
     }
 
     @GetMapping("/documents/download/{id}")
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id){
         Resource resource=managerService.downloadDocument(id);
         return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
+                .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\""+resource.getFilename()+"\""
-                )
-                .body(resource);
+                ).body(resource);
     }
 }

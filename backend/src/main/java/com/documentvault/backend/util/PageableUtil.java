@@ -21,10 +21,7 @@ public final class PageableUtil{
                 throw new IllegalArgumentException("invalid sort direction.");
             }
         }
-        Sort.Direction direction=
-                sortParts.length>1 &&
-                        sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
-        return PageRequest.of(page, size, Sort.by(direction,sortField)
-        );
+        Sort.Direction direction=sortParts.length>1 && sortParts[1].equalsIgnoreCase("asc")?Sort.Direction.ASC:Sort.Direction.DESC;
+        return PageRequest.of(page,size,Sort.by(direction,sortField));
     }
 }

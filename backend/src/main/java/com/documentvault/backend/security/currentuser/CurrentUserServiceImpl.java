@@ -20,9 +20,6 @@ public class CurrentUserServiceImpl implements CurrentUserService{
     public User getCurrentUser(){
         Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
         UserPrincipal principal=(UserPrincipal)authentication.getPrincipal();
-        return userRepository.findByEmail(
-                principal.getUsername()
-        ).orElseThrow(() ->
-                new IllegalArgumentException("user not found."));
+        return userRepository.findByEmail(principal.getUsername()).orElseThrow(() -> new IllegalArgumentException("user not found."));
     }
 }

@@ -1,6 +1,5 @@
 package com.documentvault.backend.config;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.documentvault.backend.security.jwt.JwtAuthenticationFilter;
 
@@ -26,8 +24,7 @@ public class SecurityConfig{
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception{
+    SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
@@ -57,8 +54,7 @@ public class SecurityConfig{
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
-            throws Exception{
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)throws Exception{
         return configuration.getAuthenticationManager();
     }
 }
