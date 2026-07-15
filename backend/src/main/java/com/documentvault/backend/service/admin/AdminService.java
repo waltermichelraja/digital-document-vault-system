@@ -8,6 +8,8 @@ import com.documentvault.backend.dto.UserResponse;
 
 public interface AdminService{
     List<UserResponse> getAllUsers();
+
     UserResponse updateUserRole(String userId,UpdateRoleRequest request);
+
     DashboardResponse getDashboard();
 }

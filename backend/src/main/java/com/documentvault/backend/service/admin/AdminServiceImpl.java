@@ -41,18 +41,14 @@ public class AdminServiceImpl implements AdminService{
     public UserResponse updateUserRole(String userId,UpdateRoleRequest request){
         User currentAdmin=currentUserService.getCurrentUser();
         User user=userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("user not found."));
+                .orElseThrow(() -> new IllegalArgumentException("user not found."));
         if(user.getId().equals(currentAdmin.getId())){
             throw new IllegalArgumentException("you cannot change your own role.");
         }
         Role oldRole=user.getRole();
         user.setRole(request.getRole());
         userRepository.save(user);
-        logger.info(
-                "admin '{}' changed role of '{}' from '{}' to '{}'.",
-                currentAdmin.getEmail(),user.getEmail(),oldRole,user.getRole()
-        );
+        logger.info("admin '{}' changed role of '{}' from '{}' to '{}'.",currentAdmin.getEmail(),user.getEmail(),oldRole,user.getRole());
         return new UserResponse(user.getId(),user.getFullName(),user.getEmail(),user.getRole());
     }
 

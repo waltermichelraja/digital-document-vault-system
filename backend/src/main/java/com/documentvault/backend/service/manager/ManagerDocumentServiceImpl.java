@@ -22,13 +22,13 @@ import com.documentvault.backend.repository.DocumentRepository;
 import com.documentvault.backend.service.storage.StorageService;
 
 @Service
-public class ManagerServiceImpl implements ManagerService{
+public class ManagerDocumentServiceImpl implements ManagerDocumentService {
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
     private final CurrentUserService currentUserService;
-    private static final Logger logger=LoggerFactory.getLogger(ManagerServiceImpl.class);
+    private static final Logger logger=LoggerFactory.getLogger(ManagerDocumentServiceImpl.class);
 
-    public ManagerServiceImpl(DocumentRepository documentRepository,StorageService storageService,CurrentUserService currentUserService){
+    public ManagerDocumentServiceImpl(DocumentRepository documentRepository, StorageService storageService, CurrentUserService currentUserService){
         this.documentRepository=documentRepository;
         this.storageService=storageService;
         this.currentUserService=currentUserService;
@@ -65,8 +65,7 @@ public class ManagerServiceImpl implements ManagerService{
     @Override
     public Resource downloadDocument(Long documentId){
         Document document=documentRepository.findById(documentId)
-                .orElseThrow(() ->
-                        new DocumentNotFoundException("document not found."));
+                .orElseThrow(() -> new DocumentNotFoundException("document not found."));
         User currentManager=currentUserService.getCurrentUser();
         logger.info("manager '{}' downloaded document '{}'.",currentManager.getEmail(),document.getDocumentTitle());
         return storageService.load(document.getStoredFileName());

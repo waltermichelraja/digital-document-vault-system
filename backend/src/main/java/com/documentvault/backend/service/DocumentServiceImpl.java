@@ -52,11 +52,7 @@ public class DocumentServiceImpl implements DocumentService{
         document.setOwner(currentUser);
         documentRepository.save(document);
         logger.info("user '{}' uploaded document '{}'.",currentUser.getEmail(),document.getDocumentTitle());
-        return new UploadResponse(
-                true,
-                "file uploaded successfully.",
-                document.getId()
-        );
+        return new UploadResponse(true, "file uploaded successfully.", document.getId());
     }
 
     @Override
@@ -108,8 +104,7 @@ public class DocumentServiceImpl implements DocumentService{
     private Document validateOwnership(Long documentId){
         User currentUser=currentUserService.getCurrentUser();
         Document document=documentRepository.findById(documentId)
-                .orElseThrow(() ->
-                        new DocumentNotFoundException("document not found."));
+                .orElseThrow(() -> new DocumentNotFoundException("document not found."));
         if(document.getOwner()==null || !document.getOwner().getId().equals(currentUser.getId())){
             throw new AccessDeniedException("access denied.");
         }

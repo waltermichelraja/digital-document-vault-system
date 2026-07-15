@@ -65,8 +65,7 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
     @Override
     public Resource downloadDocument(Long documentId){
         Document document=documentRepository.findById(documentId)
-                .orElseThrow(() ->
-                        new DocumentNotFoundException("document not found."));
+                .orElseThrow(() -> new DocumentNotFoundException("document not found."));
         User currentAdmin=currentUserService.getCurrentUser();
         logger.info("admin '{}' downloaded document '{}'.",currentAdmin.getEmail(),document.getDocumentTitle());
         return storageService.load(document.getStoredFileName());
@@ -75,8 +74,7 @@ public class AdminDocumentServiceImpl implements AdminDocumentService{
     @Override
     public void deleteDocument(Long documentId){
         Document document=documentRepository.findById(documentId)
-                .orElseThrow(() ->
-                        new DocumentNotFoundException("document not found."));
+                .orElseThrow(() -> new DocumentNotFoundException("document not found."));
         storageService.delete(document.getStoredFileName());
         User currentAdmin=currentUserService.getCurrentUser();
         logger.info("admin '{}' deleted document '{}'.",currentAdmin.getEmail(),document.getDocumentTitle());

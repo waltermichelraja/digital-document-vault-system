@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.*;
 
 import com.documentvault.backend.dto.DocumentResponse;
 import com.documentvault.backend.dto.PageResponse;
-import com.documentvault.backend.service.manager.ManagerService;
+import com.documentvault.backend.service.manager.ManagerDocumentService;
 
 @RestController
 @RequestMapping("/api/manager")
 @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
 public class ManagerController{
-    private final ManagerService managerService;
+    private final ManagerDocumentService managerService;
 
-    public ManagerController(ManagerService managerService){
+    public ManagerController(ManagerDocumentService managerService){
         this.managerService=managerService;
     }
 

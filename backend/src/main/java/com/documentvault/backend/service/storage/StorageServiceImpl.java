@@ -31,11 +31,7 @@ public class StorageServiceImpl implements StorageService{
             }
             String storedFileName=UUID.randomUUID()+"_"+file.getOriginalFilename();
             Path destination=storageDirectory.resolve(storedFileName);
-            Files.copy(
-                    file.getInputStream(),
-                    destination,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+            Files.copy(file.getInputStream(), destination,StandardCopyOption.REPLACE_EXISTING);
             logger.info("stored file '{}'.",storedFileName);
             return storedFileName;
         }catch(IOException e){
@@ -47,8 +43,7 @@ public class StorageServiceImpl implements StorageService{
     @Override
     public Resource load(String storedFileName){
         try{
-            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY)
-                    .resolve(storedFileName);
+            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY).resolve(storedFileName);
             Resource resource=new UrlResource(file.toUri());
             if(resource.exists() && resource.isReadable()){
                 logger.info("loaded file '{}'.",storedFileName);
@@ -64,8 +59,7 @@ public class StorageServiceImpl implements StorageService{
     @Override
     public void delete(String storedFileName){
         try{
-            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY)
-                    .resolve(storedFileName);
+            Path file=Paths.get(StorageConstants.DOCUMENT_DIRECTORY).resolve(storedFileName);
             Files.deleteIfExists(file);
             logger.info("deleted file '{}'.",storedFileName);
         }catch(IOException e){
