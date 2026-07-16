@@ -16,6 +16,7 @@ import com.documentvault.backend.service.admin.AdminService;
 
 @RestController
 @RequestMapping("/api/admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController{
     private final AdminService adminService;
     private final AdminDocumentService adminDocumentService;
@@ -26,19 +27,16 @@ public class AdminController{
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers(){
         return adminService.getAllUsers();
     }
 
     @PatchMapping("/users/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateRole(@PathVariable String id,@Valid @RequestBody UpdateRoleRequest request){
         return ResponseEntity.ok(adminService.updateUserRole(id,request));
     }
 
     @GetMapping("/documents")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<DocumentResponse>> getAllDocuments(
             @RequestParam(required=false) String search,
             @RequestParam(required=false) String category,
@@ -49,7 +47,6 @@ public class AdminController{
     }
 
     @GetMapping("/documents/download/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id){
         Resource resource=adminDocumentService.downloadDocument(id);
         return ResponseEntity.ok()
@@ -59,14 +56,12 @@ public class AdminController{
     }
 
     @DeleteMapping("/documents/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id){
         adminDocumentService.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DashboardResponse> getDashboard(){
         return ResponseEntity.ok(adminService.getDashboard());
     }
