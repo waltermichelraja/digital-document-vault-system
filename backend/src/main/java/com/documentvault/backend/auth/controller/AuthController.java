@@ -11,10 +11,11 @@ import com.documentvault.backend.auth.dto.LoginRequest;
 import com.documentvault.backend.auth.dto.RegisterRequest;
 import com.documentvault.backend.auth.service.AuthService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController{
-
     private final AuthService authService;
 
     public AuthController(AuthService authService){
@@ -22,20 +23,12 @@ public class AuthController{
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(
-            @RequestBody RegisterRequest request){
-
-        return ResponseEntity.ok(
-                authService.register(request)
-        );
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request){
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(
-            @RequestBody LoginRequest request){
-
-        return ResponseEntity.ok(
-                authService.login(request)
-        );
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
+        return ResponseEntity.ok(authService.login(request));
     }
 }

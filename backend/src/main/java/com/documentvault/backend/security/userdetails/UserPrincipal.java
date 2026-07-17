@@ -3,12 +3,14 @@ package com.documentvault.backend.security.userdetails;
 import java.util.Collection;
 import java.util.List;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.documentvault.backend.entity.User;
 
+@Getter
 public class UserPrincipal implements UserDetails{
     private final User user;
 
@@ -18,11 +20,7 @@ public class UserPrincipal implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
-        return List.of(
-                new SimpleGrantedAuthority(
-                        "ROLE_"+user.getRole().name()
-                )
-        );
+        return List.of(new SimpleGrantedAuthority("ROLE_"+user.getRole().name()));
     }
 
     @Override
@@ -33,10 +31,6 @@ public class UserPrincipal implements UserDetails{
     @Override
     public String getUsername(){
         return user.getEmail();
-    }
-
-    public User getUser(){
-        return user;
     }
 
     @Override

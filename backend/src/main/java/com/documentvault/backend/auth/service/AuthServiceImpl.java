@@ -1,5 +1,7 @@
 package com.documentvault.backend.auth.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private static final Logger logger=LoggerFactory.getLogger(AuthServiceImpl.class);
 
     public AuthServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder,JwtService jwtService){
         this.userRepository=userRepository;
@@ -25,15 +28,6 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public AuthResponse register(RegisterRequest request){
-        if(request.getFullName()==null||request.getFullName().isBlank()){
-            throw new IllegalArgumentException("full name cannot be empty.");
-        }
-        if(request.getEmail()==null||request.getEmail().isBlank()){
-            throw new IllegalArgumentException("email cannot be empty.");
-        }
-        if(request.getPassword()==null||request.getPassword().isBlank()){
-            throw new IllegalArgumentException("password cannot be empty.");
-        }
         if(userRepository.existsByEmail(request.getEmail())){
             throw new IllegalArgumentException("email already exists.");
         }
@@ -43,27 +37,19 @@ public class AuthServiceImpl implements AuthService{
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.EMPLOYEE);
         userRepository.save(user);
-        return new AuthResponse(
-                true,
-                "user registered successfully."
-        );
+        logger.info("user '{}' registered successfully.",user.getEmail());
+        return new AuthResponse(true,"user registered successfully.");
     }
 
     @Override
     public AuthResponse login(LoginRequest request){
         User user=userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("invalid email or password."));
-        if(!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword())){
+                .orElseThrow(() -> new IllegalArgumentException("invalid email or password."));
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new IllegalArgumentException("invalid email or password.");
         }
         String token=jwtService.generateToken(user.getEmail());
-        return new AuthResponse(
-                true,
-                "login successful.",
-                token
-        );
+        logger.info("user '{}' logged in successfully.",user.getEmail());
+        return new AuthResponse(true,"login successful.",token);
     }
 }
