@@ -49,7 +49,10 @@ public class AuthServiceImpl implements AuthService{
             throw new IllegalArgumentException("invalid email or password.");
         }
         String token=jwtService.generateToken(user.getEmail());
+        AuthResponse response=new AuthResponse(true,"login successful.",token);
+        response.setFullName(user.getFullName());
+        response.setRole(user.getRole());
         logger.info("user '{}' logged in successfully.",user.getEmail());
-        return new AuthResponse(true,"login successful.",token);
+        return response;
     }
 }
