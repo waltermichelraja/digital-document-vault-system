@@ -1,10 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
-import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 
 export default function Documents() {
-  const { logout } = useAuth();
   const [docs, setDocs] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -13,8 +10,9 @@ export default function Documents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [file, setFile] = useState(null);
+  const [title, setTitle] = useState("");
   const [uploadCategory, setUploadCategory] = useState("");
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   const fetchDocs = useCallback(async () => {
@@ -24,10 +22,10 @@ export default function Documents() {
       const res = await api.get("/documents", {
         params: { search: search || undefined, category: category || undefined, page, size: 10 },
       });
-      setDocs(res.data.content ?? res.data);
-      setTotalPages(res.data.totalPages ?? 1);
+      setDocs(res.data.content);
+      setTotalPages(res.data.totalPages);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load documents");
+      setError(err.response?.data?.message || "failed to load documents.");
     } finally {
       setLoading(false);
     }
@@ -39,22 +37,23 @@ export default function Documents() {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file || !title) return;
     setUploading(true);
     setError(null);
     try {
       const formData = new FormData();
+      formData.append("documentTitle", title);
+      formData.append("category", uploadCategory || "general");
       formData.append("file", file);
-      if (uploadCategory) formData.append("category", uploadCategory);
-
       await api.post("/documents/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setFile(null);
+      setTitle("");
       setUploadCategory("");
+      setFile(null);
       fetchDocs();
     } catch (err) {
-      setError(err.response?.data?.message || "Upload failed");
+      setError(err.response?.data?.message || "upload failed.");
     } finally {
       setUploading(false);
     }
@@ -62,52 +61,49 @@ export default function Documents() {
 
   const handleDownload = async (doc) => {
     try {
-      const res = await api.get(`/documents/${doc.id}`, { responseType: "blob" });
+      const res = await api.get(`/documents/download/${doc.id}`, { responseType: "blob" });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", doc.filename || doc.name || "document");
+      link.setAttribute("download", doc.originalFileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError("Download failed");
+      setError("download failed.");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this document?")) return;
+    if (!window.confirm("delete this document?")) return;
     try {
       await api.delete(`/documents/${id}`);
       fetchDocs();
     } catch (err) {
-      setError("Delete failed");
+      setError("delete failed.");
     }
   };
 
   return (
-    <div style={{ maxWidth: 700, margin: "40px auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>My Documents</h2>
-        <div>
-          <Link to="/" style={{ marginRight: 12 }}>Home</Link>
-          <button onClick={logout}>Logout</button>
-        </div>
-      </div>
+    <div style={{ maxWidth: 800, margin: "0 auto" }}>
+      <h2>My Documents</h2>
 
-      <form onSubmit={handleUpload} style={{ margin: "20px 0", display: "flex", gap: 8 }}>
+      <form onSubmit={handleUpload} style={{ margin: "20px 0", display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
+          type="text"
+          placeholder="Document title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           required
         />
         <input
           type="text"
-          placeholder="Category (optional)"
+          placeholder="Category"
           value={uploadCategory}
           onChange={(e) => setUploadCategory(e.target.value)}
         />
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} required />
         <button type="submit" disabled={uploading}>
           {uploading ? "Uploading..." : "Upload"}
         </button>
@@ -135,7 +131,8 @@ export default function Documents() {
         <table width="100%" cellPadding="6" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>
-              <th>Name</th>
+              <th>Title</th>
+              <th>File</th>
               <th>Category</th>
               <th>Uploaded</th>
               <th></th>
@@ -143,13 +140,14 @@ export default function Documents() {
           </thead>
           <tbody>
             {docs.length === 0 && (
-              <tr><td colSpan={4}>No documents yet.</td></tr>
+              <tr><td colSpan={5}>No documents yet.</td></tr>
             )}
             {docs.map((doc) => (
               <tr key={doc.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td>{doc.filename || doc.name}</td>
-                <td>{doc.category || "-"}</td>
-                <td>{doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : "-"}</td>
+                <td>{doc.documentTitle}</td>
+                <td>{doc.originalFileName}</td>
+                <td>{doc.category}</td>
+                <td>{new Date(doc.uploadedAt).toLocaleDateString()}</td>
                 <td>
                   <button onClick={() => handleDownload(doc)} style={{ marginRight: 6 }}>
                     Download
