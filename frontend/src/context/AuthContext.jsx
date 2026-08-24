@@ -16,27 +16,28 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const res = await api.post("/auth/login", { email, password });
-      const { token, ...userData } = res.data;
+      const { token, fullName, role } = res.data;
+      const userData = { fullName, role };
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.message || "login failed.");
       return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (name, email, password) => {
+  const register = async (fullName, email, password) => {
     setLoading(true);
     setError(null);
     try {
-      await api.post("/auth/register", { name, email, password });
+      await api.post("/auth/register", { fullName, email, password });
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "registration failed.");
       return false;
     } finally {
       setLoading(false);
