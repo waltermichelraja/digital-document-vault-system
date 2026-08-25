@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
 
-export default function Documents() {
+export default function AdminDocuments() {
   const [docs, setDocs] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -10,16 +10,11 @@ export default function Documents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [title, setTitle] = useState("");
-  const [uploadCategory, setUploadCategory] = useState("");
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-
   const fetchDocs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get("/documents", {
+      const res = await api.get("/admin/documents", {
         params: { search: search || undefined, category: category || undefined, page, size: 10 },
       });
       setDocs(res.data.content);
@@ -35,33 +30,9 @@ export default function Documents() {
     fetchDocs();
   }, [fetchDocs]);
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    if (!file || !title) return;
-    setUploading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append("documentTitle", title);
-      formData.append("category", uploadCategory || "general");
-      formData.append("file", file);
-      await api.post("/documents/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setTitle("");
-      setUploadCategory("");
-      setFile(null);
-      fetchDocs();
-    } catch (err) {
-      setError(err.response?.data?.message || "upload failed.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleDownload = async (doc) => {
     try {
-      const res = await api.get(`/documents/download/${doc.id}`, { responseType: "blob" });
+      const res = await api.get(`/admin/documents/download/${doc.id}`, { responseType: "blob" });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -78,7 +49,7 @@ export default function Documents() {
   const handleDelete = async (id) => {
     if (!window.confirm("delete this document?")) return;
     try {
-      await api.delete(`/documents/${id}`);
+      await api.delete(`/admin/documents/${id}`);
       fetchDocs();
     } catch (err) {
       setError("delete failed.");
@@ -87,27 +58,7 @@ export default function Documents() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <h2>My Documents</h2>
-
-      <form onSubmit={handleUpload} style={{ margin: "20px 0", display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <input
-          type="text"
-          placeholder="Document title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Category"
-          value={uploadCategory}
-          onChange={(e) => setUploadCategory(e.target.value)}
-        />
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} required />
-        <button type="submit" disabled={uploading}>
-          {uploading ? "Uploading..." : "Upload"}
-        </button>
-      </form>
+      <h2>All Documents</h2>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <input
@@ -140,7 +91,7 @@ export default function Documents() {
           </thead>
           <tbody>
             {docs.length === 0 && (
-              <tr><td colSpan={5}>No documents yet.</td></tr>
+              <tr><td colSpan={5}>No documents found.</td></tr>
             )}
             {docs.map((doc) => (
               <tr key={doc.id} style={{ borderBottom: "1px solid #eee" }}>
